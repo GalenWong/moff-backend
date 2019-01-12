@@ -12,6 +12,7 @@ func CreateNewUser(id string, name string) error {
 		ID:       id,
 		Name:     name,
 		SongList: []databases.Song{},
+		Token:    nil,
 	}
 	if exists, err := databases.UserExists(id); exists && err == nil {
 		return ErrCreateDuplicateUser

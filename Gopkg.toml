@@ -44,3 +44,11 @@
 [[constraint]]
   branch = "master"
   name = "google.golang.org/api"
+
+[[constraint]]
+  branch = "master"
+  name = "golang.org/x/oauth2"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/dhowden/tag"

@@ -6,6 +6,8 @@ import (
 	"log"
 	"moff-backend/databases"
 
+	"golang.org/x/oauth2"
+
 	jwt "github.com/dgrijalva/jwt-go"
 )
 
@@ -60,4 +62,8 @@ func ValidateAndGetID(tokenStr string) (string, error) {
 		return claims["id"].(string), nil
 	}
 	return "", err
+}
+
+func UpdateUserAuth(googleID string, tok *oauth2.Token) error {
+	return databases.UpdateUserAuth(googleID, tok)
 }

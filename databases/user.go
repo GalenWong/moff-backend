@@ -9,20 +9,6 @@ import (
 	"github.com/mongodb/mongo-go-driver/mongo"
 )
 
-func GetUserSongList(userID string) ([]Song, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-	res := GetUserDB().FindOne(ctx, bson.M{"id": userID})
-	if res.Err() != nil {
-		return nil, res.Err()
-	}
-	var user User
-	if err := res.Decode(&user); err != nil {
-		return nil, err
-	}
-	return user.SongList, nil
-}
-
 func CreateUser(new *User) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
@@ -30,10 +16,10 @@ func CreateUser(new *User) error {
 	return err
 }
 
-func UserExists(id string) (bool, error) {
+func UserExists(googleID string) (bool, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-	res := GetUserDB().FindOne(ctx, bson.M{"id": id})
+	res := GetUserDB().FindOne(ctx, bson.M{"id": googleID})
 	var existing User
 	if err := res.Decode(&existing); err == mongo.ErrNoDocuments {
 		return false, nil
@@ -44,10 +30,10 @@ func UserExists(id string) (bool, error) {
 	return true, nil
 }
 
-func FindUser(id string) (*User, error) {
+func FindUser(googleID string) (*User, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-	res := GetUserDB().FindOne(ctx, bson.M{"id": id})
+	res := GetUserDB().FindOne(ctx, bson.M{"id": googleID})
 	var u User
 	if err := res.Decode(&u); err != nil {
 		return nil, err

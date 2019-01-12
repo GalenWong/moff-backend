@@ -4,10 +4,15 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"log"
 	"moff-backend/services"
 	"net/http"
 	"strings"
+
+	"golang.org/x/oauth2"
 )
+
+const userIDctx = "userID"
 
 type loginJSON struct {
 	GoogleID string `json:"id"`
@@ -76,8 +81,34 @@ func authMidware(next http.HandlerFunc) http.HandlerFunc {
 			http.Error(w, invalidAuthHeader.Error(), http.StatusForbidden)
 			return
 		} else {
-			ctx := context.WithValue(r.Context(), "id", id)
+			ctx := context.WithValue(r.Context(), userIDctx, id)
 			next.ServeHTTP(w, r.WithContext(ctx))
 		}
+	}
+}
+
+func retrieveUserIDFromCtx(r *http.Request) (string, error) {
+	userID, ok := r.Context().Value(userIDctx).(string)
+	if !ok || userID == "" {
+		return "", errors.New("Cannot retrieve userID from ctx")
+	}
+	return userID, nil
+}
+
+func updateAuthToken(w http.ResponseWriter, r *http.Request) {
+	userID, err := retrieveUserIDFromCtx(r)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusForbidden)
+		return
+	}
+	var tok oauth2.Token
+	if err := json.NewDecoder(r.Body).Decode(&tok); err != nil {
+		log.Println(err)
+		http.Error(w, "Invalid body", http.StatusBadRequest)
+		return
+	}
+	if err := services.UpdateUserAuth(userID, &tok); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
 }
